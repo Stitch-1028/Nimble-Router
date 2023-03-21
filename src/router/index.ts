@@ -1,20 +1,26 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: import.meta.env.BASE_URL ? createWebHashHistory(import.meta.env.BASE_URL) : createWebHashHistory(),
   routes: [
     {
       path: '/',
-      component: () => import('@/layout/index.vue'),
-      name: 'layout'
+      redirect: '/login'
     },
+    // 登录
     {
       path: '/login',
-      component: () => import('@/views/Login/index.vue')
+      component: () => import('../views/login/index.vue')
     },
+    // 注册
     {
-      path: '/forget',
-      component: () => import('@/views/Forget/index.vue')
+      path: '/register',
+      component: () => import('../views/register/index.vue')
+    },
+    // 找回密码
+    {
+      path: '/getBack',
+      component: () => import('../views/getBack/index.vue')
     }
   ]
 })

@@ -20,7 +20,7 @@
     <div class="box">
       <div class="login_form">
         <div class="login_form_title">
-          <p>用户登录<span>USER LOGIN</span></p>
+          <p>找回密码<span>GET BACK</span></p>
         </div>
         <div class="login_form_main">
           <el-form
@@ -30,14 +30,34 @@
             size="large"
             label-position="top">
             <el-form-item
-              prop="username"
-              label="用户名称">
+              prop="mobile"
+              label="手机号">
               <el-input
-                v-model="form.username"
-                style="height: 64px"
-                placeholder="请输入用户名称">
+                v-model="form.mobile"
+                placeholder="请输入手机号">
               </el-input>
             </el-form-item>
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item
+                  label="验证码"
+                  prop="smsCode">
+                  <el-input
+                    v-model="form.smsCode"
+                    placeholder="请输入验证码">
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-button
+                  style="margin-top: 33px; width: 100%"
+                  type="primary"
+                  :disabled="isSend"
+                  @click="sendCode">
+                  {{ isSend ? `重新发送(${socend})` : '发送验证码' }}
+                </el-button>
+              </el-col>
+            </el-row>
             <el-form-item
               prop="password"
               label="密码">
@@ -45,41 +65,30 @@
                 v-model="form.password"
                 type="password"
                 :show-password="true"
-                style="height: 64px"
                 placeholder="请输入登录密码">
               </el-input>
             </el-form-item>
             <el-form-item>
-              <div class="tw-flex tw-justify-between tw-w-full">
-                <el-checkbox
-                  v-model="form.check"
-                  label="记住密码">
-                </el-checkbox>
-                <el-button
-                  class="tw-p-0"
-                  text
-                  type="primary"
-                  @click="router.push('/register')">
-                  用户注册
-                </el-button>
-              </div>
-            </el-form-item>
-            <el-form-item>
               <el-button
-                color="#2C73EB"
-                style="width: 100%; height: 64px; font-size: 16px"
+                type="primary"
+                style="width: 100%"
                 :loading="btnLoading"
                 @click="handelLogin">
-                登录
+                确认
               </el-button>
             </el-form-item>
           </el-form>
         </div>
-        <div class="tw-flex tw-justify-end">
+        <div class="tw-flex tw-justify-between">
           <span
             class="tw-text-[16px] tw-text-[#2C73EB] tw-cursor-pointer"
-            @click="router.push('/getBack')">
-            忘记密码
+            @click="router.push('/register')">
+            注册
+          </span>
+          <span
+            class="tw-text-[16px] tw-text-[#2C73EB] tw-cursor-pointer"
+            @click="router.push('/login')">
+            登录
           </span>
         </div>
       </div>
@@ -88,47 +97,45 @@
 </template>
 
 <script setup>
-  import { onMounted, reactive, ref } from 'vue'
+  import { reactive, ref } from 'vue'
   import { useRouter } from 'vue-router'
   import { ElMessage } from 'element-plus'
-  import { login } from '@/apis'
+  import { getBack } from '@/apis'
   import { useUserStore } from '@/stores/user'
 
   const router = useRouter()
   const store = useUserStore()
   // 表单数据
   const form = reactive({
-    username: '',
-    password: '',
-    check: false
+    mobile: '',
+    smsCode: '',
+    password: ''
   })
 
   // // 表单校验
   const rules = {
-    username: [{ required: true, message: '请输入用户名', trigger: ['change', 'blur'] }],
-    password: [
-      { required: true, message: '请输入密码', trigger: ['change', 'blur'] }
-      // {
-      //   pattern: /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[~!@#$%^&*()_+`\-={}:";'<>?,./]).{10,}$/,
-      //   message: '密码必须10位以上并包含字母数字字符',
-      //   trigger: ['change', 'blur']
-      // }
-    ]
+    mobile: [{ required: true, message: '请输入手机号', trigger: ['change', 'blur'] }],
+    smsCode: [{ required: true, message: '请输入验证码', trigger: ['change', 'blur'] }],
+    password: [{ required: true, message: '请输入新密码', trigger: ['change', 'blur'] }]
   }
-
-  onMounted(() => {
-    if (localStorage.getItem('remember_me') === 'true') {
-      form.username = localStorage.getItem('username')
-      form.check = true
-      const base64 = localStorage.getItem('password')
-      // form.password = CryptoJS.enc.Base64.parse(base64).toString(CryptoJS.enc.Utf8)
-      form.password = base64
-    }
-  })
 
   const FormRef = ref(null)
   const btnLoading = ref(false)
 
+  const isSend = ref(false)
+  const socend = ref(60)
+  const sendCode = () => {
+    isSend.value = true
+    const time = setInterval(() => {
+      if (socend.value > 0) {
+        socend.value = socend.value - 1
+      } else {
+        isSend.value = false
+        socend.value = 60
+        clearInterval(time)
+      }
+    }, 1000)
+  }
   // /**
   //  * 登录
   //  * username: admin
@@ -140,22 +147,8 @@
         return
       }
 
-      // 本地缓存
-      if (form.check) {
-        localStorage.setItem('remember_me', true)
-        localStorage.setItem('username', form.username)
-        localStorage.setItem('password', form.password)
-      } else {
-        localStorage.removeItem('remember_me')
-        localStorage.removeItem('username')
-        localStorage.removeItem('password')
-      }
-
       btnLoading.value = true
-      login({
-        username: form.username,
-        password: form.password
-      })
+      getBack({ ...form })
         .then((res) => {
           if (res.data.code === 0) {
             const { token, userInfo } = res.data.data
@@ -174,6 +167,8 @@
           btnLoading.value = false
         })
     })
+    // store.setUserRole(1)
+    // router.push('/')
   }
 </script>
 

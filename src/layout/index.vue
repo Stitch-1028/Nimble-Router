@@ -23,7 +23,7 @@
   const route = useRoute()
   const router = useRouter()
   onMounted(() => {
-    console.log(router.getRoutes())
+    console.log(router.options.routes)
   })
   const newRouter = {
     path: '/newAdmin',
@@ -38,7 +38,7 @@
   }
 
   const addRouter = () => {
-    console.log(router.getRoutes())
+    console.log(router.options.routes)
     router.addRoute(newRouter)
     console.log(router.getRoutes())
   }
