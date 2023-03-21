@@ -54,7 +54,7 @@
                   type="primary"
                   :disabled="isSend"
                   @click="sendCode">
-                  {{ isSend ? `重新发送(${socend})` : '发送验证码' }}
+                  {{ isSend ? `重新发送(${second})` : '发送验证码' }}
                 </el-button>
               </el-col>
             </el-row>
@@ -73,7 +73,7 @@
                 type="primary"
                 style="width: 100%"
                 :loading="btnLoading"
-                @click="handelLogin">
+                @click="handelLogin(FormRef)">
                 确认
               </el-button>
             </el-form-item>
@@ -87,7 +87,7 @@
           </span>
           <span
             class="tw-text-[16px] tw-text-[#2C73EB] tw-cursor-pointer"
-            @click="router.push('/login')">
+            @click="router.push('/')">
             登录
           </span>
         </div>
@@ -96,10 +96,10 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { reactive, ref } from 'vue'
   import { useRouter } from 'vue-router'
-  import { ElMessage } from 'element-plus'
+  import { ElMessage, FormInstance } from 'element-plus'
   import { getBack } from '@/apis'
   import { useUserStore } from '@/stores/user'
 
@@ -119,19 +119,19 @@
     password: [{ required: true, message: '请输入新密码', trigger: ['change', 'blur'] }]
   }
 
-  const FormRef = ref(null)
+  const FormRef = ref<FormInstance>()
   const btnLoading = ref(false)
 
   const isSend = ref(false)
-  const socend = ref(60)
+  const second = ref(60)
   const sendCode = () => {
     isSend.value = true
     const time = setInterval(() => {
-      if (socend.value > 0) {
-        socend.value = socend.value - 1
+      if (second.value > 0) {
+        second.value = second.value - 1
       } else {
         isSend.value = false
-        socend.value = 60
+        second.value = 60
         clearInterval(time)
       }
     }, 1000)
@@ -141,8 +141,9 @@
   //  * username: admin
   //  * password: 123456
   //  */
-  const handelLogin = () => {
-    FormRef.value.validate((valid) => {
+  const handelLogin = (FormRef: FormInstance | undefined) => {
+    if (!FormRef) return
+    FormRef.validate((valid) => {
       if (!valid) {
         return
       }

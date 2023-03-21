@@ -1,4 +1,8 @@
-declare module '*.vue'
+declare module '*.vue' {
+  import Vue from 'vue'
+  export default Vue
+}
+declare module '*'
 declare module 'element-plus/dist/locale/zh-cn.mjs'
 declare type Method = 'get' | 'delete' | 'post' | 'put'
 declare type onNull = { [other?: string]: any } | undefined
@@ -17,4 +21,10 @@ declare interface axiosReturnType {
   code: number
   data: unknown
   [other: string]: any
+}
+
+declare interface paginationType {
+  pageSize: number
+  pageNumber: number
+  total: number
 }

@@ -11,10 +11,11 @@ export const useUserStore = defineStore('user', {
         const { role } = state.userInfo
         if (role) {
           // 暂时先给管理员
-          return role.roleName
+          // return role.roleName
+          return '超级管理员'
         }
       } else {
-        return null
+        return ''
       }
     }
   },
@@ -23,13 +24,9 @@ export const useUserStore = defineStore('user', {
       localStorage.setItem('userInfo', JSON.stringify(data))
       this.userInfo = data
     },
-    setUserRole<T extends string>(role: T) {
-      localStorage.setItem('role', role)
-    },
     async getUserInfo() {
-      let res
       try {
-        res = await getUserInfo()
+        const res = await getUserInfo()
         if (res.data.code === 0) {
           this.userInfo = res.data.data
         }

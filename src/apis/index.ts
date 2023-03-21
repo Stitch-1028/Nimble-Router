@@ -36,7 +36,7 @@ export const getBack = <T>(data: T) => post('/api/v1/account/modify/password', d
 //  * @param {*} data
 //  * 获取设备信息列表接口
 //  */
-// export const getRoleList = (data) => get('/api/v1/sysRole/list', data)
+export const getRoleList = <T>(data: T) => get('/api/v1/sysRole/list', data)
 
 // /**
 //  * @param {*} data
